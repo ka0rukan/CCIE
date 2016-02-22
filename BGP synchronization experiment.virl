@@ -3,7 +3,7 @@
     <node name="iosv-1" type="SIMPLE" subtype="IOSv" location="180,120">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 22:36:21 UTC Tue Dec 29 2015
+! Last configuration change at 23:40:13 UTC Tue Dec 29 2015
 !
 version 15.6
 service timestamps debug datetime msec
@@ -66,7 +66,7 @@ interface Loopback1
  ip address 1.1.1.1 255.255.255.255
 !
 interface GigabitEthernet0/0
- no ip address
+ ip address 10.255.0.244 255.255.0.0
  shutdown
  duplex auto
  speed auto
@@ -166,7 +166,7 @@ end</entry>
     <node name="iosv-2" type="SIMPLE" subtype="IOSv" location="180,252">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 22:36:25 UTC Tue Dec 29 2015
+! Last configuration change at 23:40:12 UTC Tue Dec 29 2015
 !
 version 15.6
 service timestamps debug datetime msec
@@ -229,7 +229,7 @@ interface Loopback2
  ip address 2.2.2.2 255.255.255.255
 !
 interface GigabitEthernet0/0
- no ip address
+ ip address 10.255.0.243 255.255.0.0
  shutdown
  duplex auto
  speed auto
@@ -329,7 +329,7 @@ end</entry>
     <node name="iosv-3" type="SIMPLE" subtype="IOSv" location="96,192">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 22:36:29 UTC Tue Dec 29 2015
+! Last configuration change at 23:40:10 UTC Tue Dec 29 2015
 !
 version 15.6
 service timestamps debug datetime msec
@@ -392,7 +392,7 @@ interface Loopback3
  ip address 3.3.3.3 255.255.255.255
 !
 interface GigabitEthernet0/0
- no ip address
+ ip address 10.255.0.242 255.255.0.0
  shutdown
  duplex auto
  speed auto
@@ -488,7 +488,7 @@ end</entry>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
     </node>
-    <node name="iosv-4" type="SIMPLE" subtype="IOSv" location="312,120">
+    <node name="iosv-4" type="SIMPLE" subtype="IOSv" location="312,120" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
 ! Last configuration change at 22:36:36 UTC Tue Dec 29 2015
@@ -646,7 +646,7 @@ end</entry>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
     </node>
-    <node name="iosv-5" type="SIMPLE" subtype="IOSv" location="312,252">
+    <node name="iosv-5" type="SIMPLE" subtype="IOSv" location="312,252" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
 ! Last configuration change at 22:36:29 UTC Tue Dec 29 2015
@@ -804,7 +804,7 @@ end</entry>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
     </node>
-    <node name="iosv-6" type="SIMPLE" subtype="IOSv" location="408,192">
+    <node name="iosv-6" type="SIMPLE" subtype="IOSv" location="408,192" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
 ! Last configuration change at 22:36:24 UTC Tue Dec 29 2015
@@ -962,7 +962,7 @@ end</entry>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
     </node>
-    <node name="iosv-7" type="SIMPLE" subtype="IOSv" location="408,312">
+    <node name="iosv-7" type="SIMPLE" subtype="IOSv" location="408,312" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
 ! Last configuration change at 22:36:21 UTC Tue Dec 29 2015
@@ -1096,10 +1096,10 @@ end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="iosv-8" type="SIMPLE" subtype="IOSv" location="96,72">
+    <node name="iosv-8" type="SIMPLE" subtype="IOSv" location="96,72" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 22:36:31 UTC Tue Dec 29 2015
+! Last configuration change at 23:40:13 UTC Tue Dec 29 2015
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1162,7 +1162,7 @@ interface Loopback8
  ip address 8.8.8.8 255.255.255.255
 !
 interface GigabitEthernet0/0
- no ip address
+ ip address 10.255.0.246 255.255.0.0
  shutdown
  duplex auto
  speed auto
