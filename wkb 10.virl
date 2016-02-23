@@ -3,7 +3,7 @@
     <node name="iosvl2-1" type="SIMPLE" subtype="IOSvL2" location="201,286">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 02:54:10 UTC Tue Feb 23 2016
+! Last configuration change at 17:11:02 UTC Tue Feb 23 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -29,6 +29,9 @@ vtp mode transparent
 !
 !
 !
+ip dhcp snooping vlan 16
+no ip dhcp snooping information option
+ip dhcp snooping
 ip cef
 no ipv6 cef
 !
@@ -97,6 +100,7 @@ interface GigabitEthernet1/1
  media-type rj45
  negotiation auto
  spanning-tree portfast edge
+ ip dhcp snooping trust
 !
 interface GigabitEthernet1/2
  switchport access vlan 60
@@ -203,7 +207,7 @@ end</entry>
     <node name="iosvl2-2" type="SIMPLE" subtype="IOSvL2" location="342,289">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 02:54:09 UTC Tue Feb 23 2016
+! Last configuration change at 17:11:04 UTC Tue Feb 23 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -229,6 +233,9 @@ vtp mode transparent
 !
 !
 !
+ip dhcp snooping vlan 16
+no ip dhcp snooping information option
+ip dhcp snooping
 ip cef
 no ipv6 cef
 !
@@ -321,6 +328,7 @@ interface GigabitEthernet2/2
  switchport mode trunk
  media-type rj45
  negotiation auto
+ ip dhcp snooping trust
 !
 interface GigabitEthernet2/3
  description DISABLE
@@ -391,7 +399,7 @@ end</entry>
     <node name="iosvl2-3" type="SIMPLE" subtype="IOSvL2" location="212,369">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 02:54:04 UTC Tue Feb 23 2016
+! Last configuration change at 17:11:21 UTC Tue Feb 23 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -570,7 +578,7 @@ end</entry>
     <node name="iosvl2-4" type="SIMPLE" subtype="IOSvL2" location="365,370">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 02:54:08 UTC Tue Feb 23 2016
+! Last configuration change at 17:10:49 UTC Tue Feb 23 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -732,7 +740,7 @@ end</entry>
     <node name="iosv-1" type="SIMPLE" subtype="IOSv" location="155,58" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 02:54:26 UTC Tue Feb 23 2016
+! Last configuration change at 17:12:38 UTC Tue Feb 23 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -792,7 +800,7 @@ redundancy
 !
 !
 interface GigabitEthernet0/0
- ip address 10.255.0.47 255.255.0.0
+ ip address 10.255.0.60 255.255.0.0
  shutdown
  duplex auto
  speed auto
@@ -881,7 +889,7 @@ end</entry>
     <node name="iosv-2" type="SIMPLE" subtype="IOSv" location="160,133" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:12 UTC Mon Feb 22 2016
+! Last configuration change at 17:12:34 UTC Tue Feb 23 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -941,15 +949,16 @@ redundancy
 !
 !
 interface GigabitEthernet0/0
- no ip address
+ ip address 10.255.0.57 255.255.0.0
  shutdown
  duplex auto
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
- no ip address
- shutdown
+ bandwidth 100000
+ ip address 151.10.25.2 255.255.255.0
+ delay 10
  duplex auto
  speed auto
  media-type rj45
@@ -969,8 +978,9 @@ interface GigabitEthernet0/3
  media-type rj45
 !
 interface GigabitEthernet0/4
- no ip address
- shutdown
+ bandwidth 100000
+ ip address 151.10.23.2 255.255.255.0
+ delay 10
  duplex auto
  speed auto
  media-type rj45
@@ -1032,7 +1042,7 @@ end</entry>
     <node name="iosv-3" type="SIMPLE" subtype="IOSv" location="266,65" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:13 UTC Mon Feb 22 2016
+! Last configuration change at 17:12:53 UTC Tue Feb 23 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1092,15 +1102,15 @@ redundancy
 !
 !
 interface GigabitEthernet0/0
- no ip address
+ ip address 10.255.0.58 255.255.0.0
  shutdown
  duplex auto
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
- no ip address
- shutdown
+ bandwidth 100000
+ ip address 151.10.35.3 255.255.255.0
  duplex auto
  speed auto
  media-type rj45
@@ -1120,8 +1130,9 @@ interface GigabitEthernet0/3
  media-type rj45
 !
 interface GigabitEthernet0/4
- no ip address
- shutdown
+ bandwidth 100000
+ ip address 151.10.23.3 255.255.255.0
+ delay 10
  duplex auto
  speed auto
  media-type rj45
@@ -1183,7 +1194,7 @@ end</entry>
     <node name="iosv-4" type="SIMPLE" subtype="IOSv" location="270,138" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:14 UTC Mon Feb 22 2016
+! Last configuration change at 17:13:08 UTC Tue Feb 23 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1243,7 +1254,7 @@ redundancy
 !
 !
 interface GigabitEthernet0/0
- no ip address
+ ip address 10.255.0.61 255.255.0.0
  shutdown
  duplex auto
  speed auto
@@ -1326,7 +1337,7 @@ end</entry>
     <node name="iosv-5" type="SIMPLE" subtype="IOSv" location="385,59" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 02:54:28 UTC Tue Feb 23 2016
+! Last configuration change at 17:12:50 UTC Tue Feb 23 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1386,7 +1397,7 @@ redundancy
 !
 !
 interface GigabitEthernet0/0
- ip address 10.255.0.49 255.255.0.0
+ ip address 10.255.0.59 255.255.0.0
  shutdown
  duplex auto
  speed auto
@@ -1394,16 +1405,20 @@ interface GigabitEthernet0/0
 !
 interface GigabitEthernet0/1
  no ip address
- shutdown
  duplex auto
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1.25
+ bandwidth 100000
  encapsulation dot1Q 25
+ ip address 151.10.25.5 255.255.255.0
+ delay 10
 !
 interface GigabitEthernet0/1.35
+ bandwidth 100000
  encapsulation dot1Q 35
+ ip address 151.10.35.5 255.255.255.0
 !
 ip forward-protocol nd
 !
@@ -1459,7 +1474,7 @@ end</entry>
     <node name="iosv-6" type="SIMPLE" subtype="IOSv" location="400,138" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 02:54:26 UTC Tue Feb 23 2016
+! Last configuration change at 17:12:50 UTC Tue Feb 23 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1527,7 +1542,7 @@ redundancy
 !
 !
 interface GigabitEthernet0/0
- ip address 10.255.0.48 255.255.0.0
+ ip address 10.255.0.62 255.255.0.0
  shutdown
  duplex auto
  speed auto
@@ -1600,7 +1615,7 @@ end</entry>
     <node name="iosv-7" type="SIMPLE" subtype="IOSv" location="92,297" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:21 UTC Mon Feb 22 2016
+! Last configuration change at 17:13:15 UTC Tue Feb 23 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1660,7 +1675,7 @@ redundancy
 !
 !
 interface GigabitEthernet0/0
- no ip address
+ ip address 10.255.0.63 255.255.0.0
  shutdown
  duplex auto
  speed auto
@@ -1727,7 +1742,7 @@ end</entry>
     <node name="iosv-8" type="SIMPLE" subtype="IOSv" location="94,390" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:22 UTC Mon Feb 22 2016
+! Last configuration change at 17:13:22 UTC Tue Feb 23 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1787,7 +1802,7 @@ redundancy
 !
 !
 interface GigabitEthernet0/0
- no ip address
+ ip address 10.255.0.64 255.255.0.0
  shutdown
  duplex auto
  speed auto
@@ -1862,7 +1877,7 @@ end</entry>
     <node name="iosv-9" type="SIMPLE" subtype="IOSv" location="501,383" excludeFromLaunch="true">
         <extensions>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:20 UTC Mon Feb 22 2016
+! Last configuration change at 17:13:34 UTC Tue Feb 23 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1922,7 +1937,7 @@ redundancy
 !
 !
 interface GigabitEthernet0/0
- no ip address
+ ip address 10.255.0.65 255.255.0.0
  shutdown
  duplex auto
  speed auto
