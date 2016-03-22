@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <topology xmlns="http://www.cisco.com/VIRL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="0.9" xsi:schemaLocation="http://www.cisco.com/VIRL https://raw.github.com/CiscoVIRL/schema/v0.9/virl.xsd">
-    <node name="iosvl2-1" type="SIMPLE" subtype="IOSvL2" location="201,286" excludeFromLaunch="true">
+    <extensions>
+        <entry key="management_network" type="String">user</entry>
+        <entry key="AutoNetkit.address_family" type="String">None</entry>
+    </extensions>
+    <node name="iosvl2-1" type="SIMPLE" subtype="IOSvL2" location="201,286">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:11:58 UTC Mon Feb 22 2016
+! Last configuration change at 01:27:27 UTC Tue Mar 22 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -11,12 +16,21 @@ service timestamps log datetime msec
 no service password-encryption
 service compress-config
 !
-hostname SW1
+hostname iosvl2-1
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 !
@@ -24,22 +38,27 @@ no aaa new-model
 !
 !
 !
-vtp domain TEST
+vtp domain virl.lab
 vtp mode transparent
 !
 !
 !
+no ip domain-lookup
 ip cef
 no ipv6 cef
 !
 !
 !
-spanning-tree mode rapid-pvst
+spanning-tree mode pvst
 spanning-tree extend system-id
 !
 vlan internal allocation policy ascending
 !
-vlan 10,20,30,40,50,60,70 
+vlan 2
+ name ank_vlan2
+!
+vlan 10,20,30,40,60 
+no cdp run
 !
 ! 
 !
@@ -54,51 +73,95 @@ vlan 10,20,30,40,50,60,70
 !
 !
 !
-interface GigabitEthernet0/0
- media-type rj45
- negotiation auto
+interface Loopback0
+ description Loopback
+ no ip address
 !
 interface GigabitEthernet0/1
+ description to iosv-2
+ switchport access vlan 40
+ switchport mode access
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet0/2
+ description to iosv-3
+ switchport access vlan 30
+ switchport mode access
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet0/3
+ description GigabitEthernet0/3
  media-type rj45
  negotiation auto
 !
+interface GigabitEthernet0/0
+ description OOB management
+ no switchport
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.154 255.255.0.0
+ negotiation auto
+!
 interface GigabitEthernet1/0
+ description GigabitEthernet1/0
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/1
+ description to iosv-6
+ switchport access vlan 2
+ switchport trunk allowed vlan 10,60
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/2
+ description to iosvl2-3
+ switchport trunk allowed vlan 20,40
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/3
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/0
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/1
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/2
+ description to iosvl2-2
+ switchport trunk allowed vlan 10,20,30,60
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/3
+ description to iosvl2-2
+ switchport trunk allowed vlan 10,20,30,60
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
  media-type rj45
  negotiation auto
 !
@@ -143,8 +206,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
+ exec-timeout 720 0
+ password cisco
+ login
+ transport input telnet ssh
 !
 !
 end</entry>
@@ -161,10 +229,11 @@ end</entry>
         <interface id="9" name="GigabitEthernet2/2"/>
         <interface id="10" name="GigabitEthernet2/3"/>
     </node>
-    <node name="iosvl2-2" type="SIMPLE" subtype="IOSvL2" location="342,289" excludeFromLaunch="true">
+    <node name="iosvl2-2" type="SIMPLE" subtype="IOSvL2" location="342,289">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:11:57 UTC Mon Feb 22 2016
+! Last configuration change at 01:28:09 UTC Tue Mar 22 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -172,12 +241,21 @@ service timestamps log datetime msec
 no service password-encryption
 service compress-config
 !
-hostname SW2
+hostname iosvl2-2
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 !
@@ -185,22 +263,23 @@ no aaa new-model
 !
 !
 !
-vtp domain TEST
 vtp mode transparent
 !
 !
 !
+no ip domain-lookup
 ip cef
 no ipv6 cef
 !
 !
 !
-spanning-tree mode rapid-pvst
+spanning-tree mode pvst
 spanning-tree extend system-id
 !
 vlan internal allocation policy ascending
 !
-vlan 10,20,30,40,50,60,70 
+vlan 2,10,20,30,60 
+no cdp run
 !
 ! 
 !
@@ -215,51 +294,95 @@ vlan 10,20,30,40,50,60,70
 !
 !
 !
-interface GigabitEthernet0/0
- media-type rj45
- negotiation auto
+interface Loopback0
+ description Loopback
+ no ip address
 !
 interface GigabitEthernet0/1
+ description to iosv-1
+ switchport access vlan 2
+ switchport trunk allowed vlan 20,60
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet0/2
+ description to iosv-3
+ switchport access vlan 10
+ switchport mode access
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet0/3
+ description to iosv-4
+ switchport access vlan 30
+ switchport mode access
  media-type rj45
  negotiation auto
 !
+interface GigabitEthernet0/0
+ description OOB management
+ no switchport
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.156 255.255.0.0
+ negotiation auto
+!
 interface GigabitEthernet1/0
+ description GigabitEthernet1/0
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/1
+ description GigabitEthernet1/1
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/2
+ description to iosvl2-4
+ switchport access vlan 30
+ switchport trunk encapsulation dot1q
+ switchport mode access
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/3
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/0
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/1
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/2
+ description to iosvl2-1
+ switchport trunk allowed vlan 10,20,30,60
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/3
+ description to iosvl2-1
+ switchport trunk allowed vlan 10,20,30,60
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
  media-type rj45
  negotiation auto
 !
@@ -304,8 +427,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
+ exec-timeout 720 0
+ password cisco
+ login
+ transport input telnet ssh
 !
 !
 end</entry>
@@ -322,10 +450,11 @@ end</entry>
         <interface id="9" name="GigabitEthernet2/2"/>
         <interface id="10" name="GigabitEthernet2/3"/>
     </node>
-    <node name="iosvl2-3" type="SIMPLE" subtype="IOSvL2" location="212,369" excludeFromLaunch="true">
+    <node name="iosvl2-3" type="SIMPLE" subtype="IOSvL2" location="212,369">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:11:57 UTC Mon Feb 22 2016
+! Last configuration change at 01:27:38 UTC Tue Mar 22 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -333,12 +462,21 @@ service timestamps log datetime msec
 no service password-encryption
 service compress-config
 !
-hostname SW3
+hostname iosvl2-3
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 !
@@ -346,22 +484,27 @@ no aaa new-model
 !
 !
 !
-vtp domain TEST
+vtp domain virl.lab
 vtp mode transparent
 !
 !
 !
+no ip domain-lookup
 ip cef
 no ipv6 cef
 !
 !
 !
-spanning-tree mode rapid-pvst
+spanning-tree mode pvst
 spanning-tree extend system-id
 !
 vlan internal allocation policy ascending
 !
-vlan 10,20,30,40,50,60,70 
+vlan 2
+ name ank_vlan2
+!
+vlan 20,40 
+no cdp run
 !
 ! 
 !
@@ -376,51 +519,91 @@ vlan 10,20,30,40,50,60,70
 !
 !
 !
-interface GigabitEthernet0/0
- media-type rj45
- negotiation auto
+interface Loopback0
+ description Loopback
+ no ip address
 !
 interface GigabitEthernet0/1
+ description to iosv-7
+ switchport access vlan 20
+ switchport mode access
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet0/2
+ description to iosv-8
+ switchport access vlan 40
+ switchport mode access
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet0/3
+ description GigabitEthernet0/3
  media-type rj45
  negotiation auto
 !
+interface GigabitEthernet0/0
+ description OOB management
+ no switchport
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.155 255.255.0.0
+ negotiation auto
+!
 interface GigabitEthernet1/0
+ description GigabitEthernet1/0
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/1
+ description GigabitEthernet1/1
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/2
+ description to iosvl2-1
+ switchport trunk allowed vlan 20,40
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/3
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/0
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/1
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/2
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/3
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
@@ -465,8 +648,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
+ exec-timeout 720 0
+ password cisco
+ login
+ transport input telnet ssh
 !
 !
 end</entry>
@@ -483,10 +671,11 @@ end</entry>
         <interface id="9" name="GigabitEthernet2/2"/>
         <interface id="10" name="GigabitEthernet2/3"/>
     </node>
-    <node name="iosvl2-4" type="SIMPLE" subtype="IOSvL2" location="365,370" excludeFromLaunch="true">
+    <node name="iosvl2-4" type="SIMPLE" subtype="IOSvL2" location="365,370">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:11:58 UTC Mon Feb 22 2016
+! Last configuration change at 01:28:19 UTC Tue Mar 22 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -494,12 +683,21 @@ service timestamps log datetime msec
 no service password-encryption
 service compress-config
 !
-hostname SW4
+hostname iosvl2-4
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 !
@@ -507,22 +705,27 @@ no aaa new-model
 !
 !
 !
-vtp domain TEST
+vtp domain virl.lab
 vtp mode transparent
 !
 !
 !
+no ip domain-lookup
 ip cef
 no ipv6 cef
 !
 !
 !
-spanning-tree mode rapid-pvst
+spanning-tree mode pvst
 spanning-tree extend system-id
 !
 vlan internal allocation policy ascending
 !
-vlan 10,20,30,40,50,60,70 
+vlan 2
+ name ank_vlan2
+!
+vlan 30 
+no cdp run
 !
 ! 
 !
@@ -537,51 +740,89 @@ vlan 10,20,30,40,50,60,70
 !
 !
 !
-interface GigabitEthernet0/0
- media-type rj45
- negotiation auto
+interface Loopback0
+ description Loopback
+ no ip address
 !
 interface GigabitEthernet0/1
+ description to iosv-9
+ switchport access vlan 30
+ switchport mode access
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet0/2
+ description GigabitEthernet0/2
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet0/3
+ description GigabitEthernet0/3
  media-type rj45
  negotiation auto
 !
+interface GigabitEthernet0/0
+ description OOB management
+ no switchport
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.157 255.255.0.0
+ negotiation auto
+!
 interface GigabitEthernet1/0
+ description GigabitEthernet1/0
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/1
+ description GigabitEthernet1/1
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/2
+ description to iosvl2-2
+ switchport access vlan 30
+ switchport trunk encapsulation dot1q
+ switchport mode access
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet1/3
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/0
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/1
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/2
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
 interface GigabitEthernet2/3
+ description DISABLE
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ shutdown
  media-type rj45
  negotiation auto
 !
@@ -626,8 +867,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
+ exec-timeout 720 0
+ password cisco
+ login
+ transport input telnet ssh
 !
 !
 end</entry>
@@ -646,20 +892,30 @@ end</entry>
     </node>
     <node name="iosv-1" type="SIMPLE" subtype="IOSv" location="155,58" excludeFromLaunch="true">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:14 UTC Mon Feb 22 2016
+! Last configuration change at 01:38:15 UTC Tue Mar 22 2016
 !
 version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname R1
+hostname iosv-1
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 ethernet lmi ce
@@ -681,17 +937,22 @@ mmi snmp-timeout 180
 !
 !
 !
+no ip domain lookup
+ip domain name virl.info
 ip cef
-no ipv6 cef
+ipv6 unicast-routing
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
 !
+username cisco privilege 15 secret 5 $1$epo3$e7e5puQ51m5QdEMe7.sLB/
 !
 redundancy
 !
+no cdp run
 !
 ! 
 !
@@ -706,39 +967,66 @@ redundancy
 !
 !
 !
-interface GigabitEthernet0/0
+interface Loopback0
+ description Loopback
  no ip address
- shutdown
- duplex auto
+!
+interface Loopback101
+ ip address 172.16.101.1 255.255.255.0
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.161 255.255.0.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
+ description to iosvl2-2
  no ip address
- shutdown
- duplex auto
+ duplex full
  speed auto
  media-type rj45
 !
+interface GigabitEthernet0/1.20
+ encapsulation dot1Q 20
+ ip address 172.16.17.1 255.255.255.0
+ no cdp enable
+!
+interface GigabitEthernet0/1.60
+ encapsulation dot1Q 60
+ ip address 172.16.16.1 255.255.255.0
+ no cdp enable
+!
 interface GigabitEthernet0/2
- no ip address
- shutdown
- duplex auto
+ description to unmanagedswitch-1
+ ip address 172.16.124.1 255.255.255.0
+ ip ospf network point-to-multipoint
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/3
- no ip address
- shutdown
- duplex auto
+ description to iosv-3
+ ip address 172.16.13.1 255.255.255.0
+ ip ospf network broadcast
+ ip ospf priority 255
+ duplex full
  speed auto
  media-type rj45
+!
+router ospf 1
+ router-id 172.16.101.1
+ network 172.16.13.0 0.0.0.255 area 0
+ network 172.16.124.0 0.0.0.255 area 0
 !
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
+ip ssh server algorithm authentication password
 !
 !
 !
@@ -774,10 +1062,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
- login
- transport input none
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
 !
 no scheduler allocate
 !
@@ -789,20 +1080,30 @@ end</entry>
     </node>
     <node name="iosv-2" type="SIMPLE" subtype="IOSv" location="160,133" excludeFromLaunch="true">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:12 UTC Mon Feb 22 2016
+! Last configuration change at 03:16:34 UTC Tue Mar 22 2016
 !
 version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname R2
+hostname iosv-2
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 ethernet lmi ce
@@ -824,17 +1125,22 @@ mmi snmp-timeout 180
 !
 !
 !
+no ip domain lookup
+ip domain name virl.info
 ip cef
-no ipv6 cef
+ipv6 unicast-routing
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
 !
+username cisco privilege 15 secret 5 $1$R.jK$ysM91.ug8Ob.YTCGi6Y2r.
 !
 redundancy
 !
+no cdp run
 !
 ! 
 !
@@ -849,47 +1155,69 @@ redundancy
 !
 !
 !
-interface GigabitEthernet0/0
+interface Loopback0
+ description Loopback
  no ip address
- shutdown
- duplex auto
+!
+interface Loopback102
+ ip address 172.16.102.1 255.255.255.0
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.163 255.255.0.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
- no ip address
- shutdown
- duplex auto
+ description to iosvl2-1
+ ip address 172.16.25.33 255.255.255.224
+ ip ospf network point-to-point
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/2
- no ip address
- shutdown
- duplex auto
+ description to unmanagedswitch-1
+ ip address 172.16.124.2 255.255.255.0
+ ip ospf network point-to-multipoint
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/3
- no ip address
- shutdown
- duplex auto
+ description to iosv-5
+ ip address 172.16.25.2 255.255.255.224
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/4
+ description GigabitEthernet0/4
  no ip address
- shutdown
- duplex auto
+ duplex full
  speed auto
  media-type rj45
+!
+router ospf 1
+ router-id 172.16.102.1
+ area 28 filter-list prefix no-lo105 in
+ network 172.16.25.2 0.0.0.0 area 25
+ network 172.16.25.33 0.0.0.0 area 28
+ network 172.16.102.1 0.0.0.0 area 0
+ network 172.16.124.0 0.0.0.255 area 0
 !
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
+ip ssh server algorithm authentication password
 !
+!
+ip prefix-list no-lo105 seq 5 deny 172.16.105.0/24 le 32
+ip prefix-list no-lo105 seq 10 permit 0.0.0.0/0 le 32
 !
 !
 !
@@ -924,10 +1252,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
- login
- transport input none
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
 !
 no scheduler allocate
 !
@@ -940,20 +1271,30 @@ end</entry>
     </node>
     <node name="iosv-3" type="SIMPLE" subtype="IOSv" location="266,65" excludeFromLaunch="true">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:13 UTC Mon Feb 22 2016
+! Last configuration change at 01:48:36 UTC Tue Mar 22 2016
 !
 version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname R3
+hostname iosv-3
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 ethernet lmi ce
@@ -975,17 +1316,22 @@ mmi snmp-timeout 180
 !
 !
 !
+no ip domain lookup
+ip domain name virl.info
 ip cef
-no ipv6 cef
+ipv6 unicast-routing
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
 !
+username cisco privilege 15 secret 5 $1$wQfs$HwvOH0fNMMSEHYrifG3xR1
 !
 redundancy
 !
+no cdp run
 !
 ! 
 !
@@ -1000,46 +1346,61 @@ redundancy
 !
 !
 !
-interface GigabitEthernet0/0
+interface Loopback0
+ description Loopback
  no ip address
- shutdown
- duplex auto
+!
+interface Loopback103
+ ip address 172.16.103.1 255.255.255.0
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.164 255.255.0.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
- no ip address
- shutdown
- duplex auto
+ description to iosvl2-2
+ ip address 172.16.36.3 255.255.252.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/2
- no ip address
- shutdown
- duplex auto
+ description to iosvl2-1
+ ip address 172.16.34.3 255.255.252.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/3
- no ip address
- shutdown
- duplex auto
+ description to iosv-1
+ ip address 172.16.13.3 255.255.255.0
+ ip ospf network broadcast
+ ip ospf priority 0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/4
+ description GigabitEthernet0/4
  no ip address
- shutdown
- duplex auto
+ duplex full
  speed auto
  media-type rj45
+!
+router ospf 1
+ router-id 172.16.103.1
+ network 172.16.13.0 0.0.0.255 area 0
 !
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
+ip ssh server algorithm authentication password
 !
 !
 !
@@ -1075,10 +1436,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
- login
- transport input none
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
 !
 no scheduler allocate
 !
@@ -1091,20 +1455,30 @@ end</entry>
     </node>
     <node name="iosv-4" type="SIMPLE" subtype="IOSv" location="270,138" excludeFromLaunch="true">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:14 UTC Mon Feb 22 2016
+! Last configuration change at 01:39:10 UTC Tue Mar 22 2016
 !
 version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname R4
+hostname iosv-4
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 ethernet lmi ce
@@ -1126,17 +1500,22 @@ mmi snmp-timeout 180
 !
 !
 !
+no ip domain lookup
+ip domain name virl.info
 ip cef
-no ipv6 cef
+ipv6 unicast-routing
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
 !
+username cisco privilege 15 secret 5 $1$.6V2$Kc/ubmFRBAKljUpET0kfY.
 !
 redundancy
 !
+no cdp run
 !
 ! 
 !
@@ -1151,39 +1530,53 @@ redundancy
 !
 !
 !
-interface GigabitEthernet0/0
+interface Loopback0
+ description Loopback
  no ip address
- shutdown
- duplex auto
+!
+interface Loopback104
+ ip address 172.16.104.1 255.255.255.0
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.160 255.255.0.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
- no ip address
- shutdown
- duplex auto
+ description to iosvl2-2
+ ip address 172.16.34.4 255.255.252.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/2
- no ip address
- shutdown
- duplex auto
+ description to unmanagedswitch-1
+ ip address 172.16.124.4 255.255.255.0
+ ip ospf network point-to-multipoint
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/3
+ description GigabitEthernet0/3
  no ip address
- shutdown
- duplex auto
+ duplex full
  speed auto
  media-type rj45
+!
+router ospf 1
+ router-id 172.16.104.1
+ network 172.16.124.0 0.0.0.255 area 0
 !
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
+ip ssh server algorithm authentication password
 !
 !
 !
@@ -1219,10 +1612,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
- login
- transport input none
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
 !
 no scheduler allocate
 !
@@ -1234,20 +1630,30 @@ end</entry>
     </node>
     <node name="iosv-5" type="SIMPLE" subtype="IOSv" location="385,59" excludeFromLaunch="true">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:17 UTC Mon Feb 22 2016
+! Last configuration change at 03:16:24 UTC Tue Mar 22 2016
 !
 version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname R5
+hostname iosv-5
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 ethernet lmi ce
@@ -1269,17 +1675,22 @@ mmi snmp-timeout 180
 !
 !
 !
+no ip domain lookup
+ip domain name virl.info
 ip cef
-no ipv6 cef
+ipv6 unicast-routing
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
 !
+username cisco privilege 15 secret 5 $1$pMml$FvHw0RwBaFCmZv00kBfW60
 !
 redundancy
 !
+no cdp run
 !
 ! 
 !
@@ -1294,26 +1705,56 @@ redundancy
 !
 !
 !
-interface GigabitEthernet0/0
+interface Loopback0
+ description Loopback
  no ip address
- shutdown
- duplex auto
+!
+interface Loopback105
+ ip address 172.16.105.1 255.255.255.0
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.159 255.255.0.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
  no ip address
- shutdown
  duplex auto
  speed auto
+!
+interface GigabitEthernet0/2
+ description GigabitEthernet0/2
+ no ip address
+ duplex full
+ speed auto
  media-type rj45
+!
+interface GigabitEthernet0/3
+ description to iosv-2
+ ip address 172.16.25.5 255.255.255.224
+ duplex full
+ speed auto
+ media-type rj45
+!
+router ospf 1
+ router-id 172.16.105.1
+ network 172.16.25.0 0.0.0.255 area 25
+ network 172.16.105.1 0.0.0.0 area 25
+ distribute-list prefix no-lo108 in
 !
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
+ip ssh server algorithm authentication password
 !
+!
+ip prefix-list no-lo108 seq 5 deny 172.16.108.0/24 le 32
+ip prefix-list no-lo108 seq 10 permit 0.0.0.0/0 le 32
 !
 !
 !
@@ -1348,10 +1789,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
- login
- transport input none
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
 !
 no scheduler allocate
 !
@@ -1363,20 +1807,30 @@ end</entry>
     </node>
     <node name="iosv-6" type="SIMPLE" subtype="IOSv" location="400,138" excludeFromLaunch="true">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:17 UTC Mon Feb 22 2016
+! Last configuration change at 19:14:19 UTC Mon Mar 21 2016
 !
 version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname R6
+hostname iosv-6
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 ethernet lmi ce
@@ -1398,17 +1852,22 @@ mmi snmp-timeout 180
 !
 !
 !
+no ip domain lookup
+ip domain name virl.info
 ip cef
-no ipv6 cef
+ipv6 unicast-routing
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
 !
+username cisco privilege 15 secret 5 $1$xa5a$Dmer4cX6HXQ.Q3jARilaF.
 !
 redundancy
 !
+no cdp run
 !
 ! 
 !
@@ -1423,25 +1882,44 @@ redundancy
 !
 !
 !
-interface GigabitEthernet0/0
+interface Loopback0
+ description Loopback
  no ip address
- shutdown
- duplex auto
+!
+interface Loopback106
+ ip address 172.16.106.1 255.255.255.0
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.147 255.255.0.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
+ description to iosvl2-1
  no ip address
- shutdown
- duplex auto
+ duplex full
  speed auto
  media-type rj45
+!
+interface GigabitEthernet0/1.10
+ encapsulation dot1Q 10
+ ip address 172.16.36.6 255.255.252.0
+ no cdp enable
+!
+interface GigabitEthernet0/1.60
+ encapsulation dot1Q 60
+ ip address 172.16.16.6 255.255.255.224
+ no cdp enable
 !
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
+ip ssh server algorithm authentication password
 !
 !
 !
@@ -1477,10 +1955,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
- login
- transport input none
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
 !
 no scheduler allocate
 !
@@ -1490,20 +1971,30 @@ end</entry>
     </node>
     <node name="iosv-7" type="SIMPLE" subtype="IOSv" location="92,297" excludeFromLaunch="true">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:21 UTC Mon Feb 22 2016
+! Last configuration change at 19:15:28 UTC Mon Mar 21 2016
 !
 version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname R7
+hostname iosv-7
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 ethernet lmi ce
@@ -1525,17 +2016,22 @@ mmi snmp-timeout 180
 !
 !
 !
+no ip domain lookup
+ip domain name virl.info
 ip cef
-no ipv6 cef
+ipv6 unicast-routing
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
 !
+username cisco privilege 15 secret 5 $1$fty.$74j5/DHsoHiXTk1Tor36M.
 !
 redundancy
 !
+no cdp run
 !
 ! 
 !
@@ -1550,17 +2046,28 @@ redundancy
 !
 !
 !
-interface GigabitEthernet0/0
+interface Loopback0
+ description Loopback
  no ip address
- shutdown
- duplex auto
+!
+interface Loopback70
+ ip address 70.70.70.70 255.255.255.0
+!
+interface Loopback107
+ ip address 172.16.107.1 255.255.255.0
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.148 255.255.0.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
- no ip address
- shutdown
- duplex auto
+ description to iosvl2-3
+ ip address 172.16.17.7 255.255.255.0
+ duplex full
  speed auto
  media-type rj45
 !
@@ -1569,6 +2076,7 @@ ip forward-protocol nd
 !
 no ip http server
 no ip http secure-server
+ip ssh server algorithm authentication password
 !
 !
 !
@@ -1604,10 +2112,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
- login
- transport input none
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
 !
 no scheduler allocate
 !
@@ -1617,20 +2128,30 @@ end</entry>
     </node>
     <node name="iosv-8" type="SIMPLE" subtype="IOSv" location="94,390" excludeFromLaunch="true">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:22 UTC Mon Feb 22 2016
+! Last configuration change at 02:37:34 UTC Tue Mar 22 2016
 !
 version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname R8
+hostname iosv-8
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 ethernet lmi ce
@@ -1652,17 +2173,22 @@ mmi snmp-timeout 180
 !
 !
 !
+no ip domain lookup
+ip domain name virl.info
 ip cef
-no ipv6 cef
+ipv6 unicast-routing
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
 !
+username cisco privilege 15 secret 5 $1$OpAA$0clwDwKqD4UNd32fNB//F/
 !
 redundancy
 !
+no cdp run
 !
 ! 
 !
@@ -1677,32 +2203,47 @@ redundancy
 !
 !
 !
-interface GigabitEthernet0/0
+interface Loopback0
+ description Loopback
  no ip address
- shutdown
- duplex auto
+!
+interface Loopback108
+ ip address 172.16.108.1 255.255.255.0
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.162 255.255.0.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
- no ip address
- shutdown
- duplex auto
+ description to iosvl2-3
+ ip address 172.16.25.34 255.255.255.224
+ ip ospf network point-to-point
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/2
+ description GigabitEthernet0/2
  no ip address
- shutdown
- duplex auto
+ duplex full
  speed auto
  media-type rj45
+!
+router ospf 1
+ router-id 172.16.108.1
+ network 172.16.25.0 0.0.0.255 area 28
+ network 172.16.108.1 0.0.0.0 area 28
 !
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
+ip ssh server algorithm authentication password
 !
 !
 !
@@ -1738,10 +2279,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
- login
- transport input none
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
 !
 no scheduler allocate
 !
@@ -1752,20 +2296,30 @@ end</entry>
     </node>
     <node name="iosv-9" type="SIMPLE" subtype="IOSv" location="501,383" excludeFromLaunch="true">
         <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 19:25:20 UTC Mon Feb 22 2016
+! Last configuration change at 19:17:53 UTC Mon Mar 21 2016
 !
 version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname R9
+hostname iosv-9
 !
 boot-start-marker
 boot-end-marker
 !
 !
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
 !
 no aaa new-model
 ethernet lmi ce
@@ -1787,17 +2341,22 @@ mmi snmp-timeout 180
 !
 !
 !
+no ip domain lookup
+ip domain name virl.info
 ip cef
-no ipv6 cef
+ipv6 unicast-routing
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
 !
+username cisco privilege 15 secret 5 $1$5clp$VawHfEcSe8v/xdSnXvUCU/
 !
 redundancy
 !
+no cdp run
 !
 ! 
 !
@@ -1812,24 +2371,35 @@ redundancy
 !
 !
 !
-interface GigabitEthernet0/0
+interface Loopback0
+ description Loopback
  no ip address
- shutdown
- duplex auto
+!
+interface Loopback10
+ ip address 10.10.10.10 255.255.255.0
+!
+interface Loopback120
+ ip address 172.16.120.1 255.255.255.0
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.1.153 255.255.0.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/1
- no ip address
- shutdown
- duplex auto
+ description to iosvl2-4
+ ip address 172.16.34.10 255.255.252.0
+ duplex full
  speed auto
  media-type rj45
 !
 interface GigabitEthernet0/2
+ description GigabitEthernet0/2
  no ip address
- shutdown
- duplex auto
+ duplex full
  speed auto
  media-type rj45
 !
@@ -1838,6 +2408,7 @@ ip forward-protocol nd
 !
 no ip http server
 no ip http secure-server
+ip ssh server algorithm authentication password
 !
 !
 !
@@ -1873,10 +2444,13 @@ banner login `
 **************************************************************************`
 !
 line con 0
+ password cisco
 line aux 0
 line vty 0 4
- login
- transport input none
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
 !
 no scheduler allocate
 !
