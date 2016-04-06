@@ -8,7 +8,7 @@
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:45:20 UTC Sun Apr 3 2016
+! Last configuration change at 10:59:59 UTC Wed Apr 6 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -100,7 +100,7 @@ interface GigabitEthernet0/0
  description OOB management
  no switchport
  vrf forwarding Mgmt-intf
- ip address 10.255.1.214 255.255.0.0
+ ip address 10.255.0.43 255.255.0.0
  negotiation auto
 !
 interface GigabitEthernet1/0
@@ -233,7 +233,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:45:53 UTC Sun Apr 3 2016
+! Last configuration change at 10:56:28 UTC Wed Apr 6 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -325,7 +325,7 @@ interface GigabitEthernet0/0
  description OOB management
  no switchport
  vrf forwarding Mgmt-intf
- ip address 10.255.1.215 255.255.0.0
+ ip address 10.255.0.41 255.255.0.0
  negotiation auto
 !
 interface GigabitEthernet1/0
@@ -454,7 +454,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:45:45 UTC Sun Apr 3 2016
+! Last configuration change at 11:06:51 UTC Wed Apr 6 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -546,7 +546,7 @@ interface GigabitEthernet0/0
  description OOB management
  no switchport
  vrf forwarding Mgmt-intf
- ip address 10.255.1.216 255.255.0.0
+ ip address 10.255.0.42 255.255.0.0
  negotiation auto
 !
 interface GigabitEthernet1/0
@@ -675,7 +675,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:45:10 UTC Sun Apr 3 2016
+! Last configuration change at 11:18:52 UTC Wed Apr 6 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -765,7 +765,7 @@ interface GigabitEthernet0/0
  description OOB management
  no switchport
  vrf forwarding Mgmt-intf
- ip address 10.255.1.212 255.255.0.0
+ ip address 10.255.0.45 255.255.0.0
  negotiation auto
 !
 interface GigabitEthernet1/0
@@ -894,7 +894,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 14:25:49 UTC Sun Apr 3 2016
+! Last configuration change at 10:24:39 UTC Wed Apr 6 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -953,6 +953,8 @@ key chain eigrp
 !
 !
 username cisco privilege 15 secret 5 $1$epo3$e7e5puQ51m5QdEMe7.sLB/
+username SALLY privilege 15 password 0 cisco
+username SALLY autocommand access-enable
 !
 redundancy
 !
@@ -981,7 +983,7 @@ interface Loopback101
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.1.217 255.255.0.0
+ ip address 10.255.0.52 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -1003,6 +1005,7 @@ interface GigabitEthernet0/1.20
 interface GigabitEthernet0/1.60
  encapsulation dot1Q 60
  ip address 172.16.16.1 255.255.255.0
+ ip access-group 120 in
  ip authentication key-chain eigrp 1 eigrp
  ip summary-address eigrp 1 172.16.124.0 255.255.255.0
  no cdp enable
@@ -1018,6 +1021,7 @@ interface GigabitEthernet0/2
 interface GigabitEthernet0/3
  description to iosv-3
  ip address 172.16.13.1 255.255.255.0
+ ip access-group 120 in
  ip ospf network broadcast
  ip ospf priority 255
  duplex full
@@ -1038,11 +1042,25 @@ router ospf 1
  network 172.16.124.0 0.0.0.255 area 0
  distance ospf external 180
 !
+router bgp 100
+ bgp log-neighbor-changes
+ neighbor 172.16.17.7 remote-as 700
+ neighbor 172.16.102.1 remote-as 100
+ neighbor 172.16.102.1 update-source Loopback101
+ neighbor 172.16.102.1 route-reflector-client
+ neighbor 172.16.106.1 remote-as 100
+ neighbor 172.16.106.1 update-source Loopback101
+ neighbor 172.16.106.1 route-reflector-client
+ neighbor 172.16.106.1 route-map setpref in
+!
 ip forward-protocol nd
 !
 !
-no ip http server
+ip http server
+ip http port 8080
+ip http authentication local
 no ip http secure-server
+ip http path flash0:
 ip ssh server algorithm authentication password
 !
 !
@@ -1056,7 +1074,24 @@ route-map O2E permit 10
  match ip address prefix-list no124specific
  match metric 500 +- 500
 !
+route-map setpref permit 10
+ set local-preference 150
 !
+!
+access-list 120 dynamic VLAN10 timeout 10 permit tcp any host 172.16.25.5 eq telnet
+access-list 120 deny   tcp any host 172.16.25.5 eq telnet
+access-list 120 permit ospf any any
+access-list 120 permit eigrp any any
+access-list 120 permit pim any any
+access-list 120 permit icmp any any
+access-list 120 permit igmp any any
+access-list 120 permit tcp 172.16.32.0 0.0.3.255 host 172.16.124.1 eq 8080
+access-list 120 permit tcp any any eq bgp
+access-list 120 permit tcp any eq bgp any
+access-list 120 permit tcp any host 172.16.124.1 eq telnet
+access-list 120 permit tcp any host 172.16.13.1 eq telnet
+access-list 120 permit tcp any host 172.16.16.1 eq telnet
+access-list 120 deny   ip any any log
 !
 control-plane
 !
@@ -1109,7 +1144,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:46:46 UTC Sun Apr 3 2016
+! Last configuration change at 23:28:45 UTC Tue Apr 5 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1192,7 +1227,7 @@ interface Loopback102
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.1.218 255.255.0.0
+ ip address 10.255.0.50 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -1234,6 +1269,12 @@ router ospf 1
  network 172.16.25.33 0.0.0.0 area 28
  network 172.16.102.1 0.0.0.0 area 0
  network 172.16.124.0 0.0.0.255 area 0
+!
+router bgp 100
+ bgp log-neighbor-changes
+ neighbor 172.16.101.1 remote-as 100
+ neighbor 172.16.101.1 update-source Loopback102
+ neighbor 172.16.124.4 remote-as 300
 !
 ip forward-protocol nd
 !
@@ -1300,7 +1341,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 14:26:46 UTC Sun Apr 3 2016
+! Last configuration change at 11:18:41 UTC Wed Apr 6 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1340,6 +1381,17 @@ mmi snmp-timeout 180
 !
 !
 !
+ip dhcp excluded-address 172.16.36.1
+ip dhcp excluded-address 172.16.36.3
+ip dhcp excluded-address 172.16.36.6
+ip dhcp excluded-address 172.16.38.0 172.16.39.255
+!
+ip dhcp pool DHCP
+ network 172.16.36.0 255.255.252.0
+ domain-name test.com
+ dns-server 172.16.17.2 
+ netbios-node-type h-node
+ default-router 172.16.36.1 
 !
 !
 !
@@ -1364,6 +1416,8 @@ redundancy
 !
 no cdp run
 !
+track 10 interface GigabitEthernet0/3 ip routing
+!
 ! 
 !
 !
@@ -1387,7 +1441,7 @@ interface Loopback103
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.1.219 255.255.0.0
+ ip address 10.255.0.51 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -1397,6 +1451,10 @@ interface GigabitEthernet0/1
  ip address 172.16.36.3 255.255.252.0
  ip authentication key-chain eigrp 1 eigrp
  ip summary-address eigrp 1 172.16.124.0 255.255.255.0
+ glbp 1 ip 172.16.36.1
+ glbp 1 weighting 110 lower 90
+ glbp 1 load-balancing host-dependent
+ glbp 1 weighting track 10 decrement 30
  duplex full
  speed auto
  media-type rj45
@@ -1427,20 +1485,24 @@ interface GigabitEthernet0/4
 !
 !
 router eigrp 1
+ distribute-list prefix nobgp out 
  network 172.16.36.0 0.0.0.255
- redistribute rip metric 1000 100 255 1 1500 route-map R2O
  redistribute ospf 1 metric 1000 200 255 1 1500 route-map O2E
+ redistribute rip metric 1000 200 255 1 1500 route-map R2O
 !
 router ospf 1
  router-id 172.16.103.1
- redistribute rip subnets route-map R2O
  redistribute eigrp 1 subnets route-map E2O
+ redistribute rip subnets route-map R2O
  network 172.16.13.0 0.0.0.255 area 0
+ distribute-list prefix nobgp in GigabitEthernet0/3
+ distribute-list prefix nobgp out
 !
 router rip
  version 2
  redistribute eigrp 1 route-map E2R
  redistribute ospf 1 metric 5 route-map O2E
+ redistribute bgp 300 metric 3 route-map 70.70.70.0
  passive-interface default
  no passive-interface GigabitEthernet0/2
  network 172.16.0.0
@@ -1448,6 +1510,16 @@ router rip
  distribute-list prefix 124summary in
  distance 109 172.16.34.0 0.0.0.255 loops
  no auto-summary
+!
+router bgp 300
+ synchronization
+ bgp log-neighbor-changes
+ network 10.10.10.0 mask 255.255.255.0 backdoor
+ neighbor 172.16.34.10 remote-as 1000
+ neighbor 172.16.36.6 remote-as 100
+ neighbor 172.16.104.1 remote-as 300
+ neighbor 172.16.104.1 update-source Loopback103
+ neighbor 172.16.104.1 route-map setpref in
 !
 ip forward-protocol nd
 !
@@ -1457,6 +1529,8 @@ no ip http secure-server
 ip ssh server algorithm authentication password
 !
 ip access-list standard RIP
+ deny   10.10.10.0 0.0.0.255
+ deny   70.70.70.0 0.0.0.255
  permit 172.16.103.0 0.0.0.255
  permit 172.16.104.0 0.0.0.255
  permit 172.16.120.0 0.0.0.255
@@ -1470,10 +1544,19 @@ ip prefix-list 124 seq 5 permit 172.16.124.0/24
 ip prefix-list 124summary seq 5 deny 172.16.124.0/24
 ip prefix-list 124summary seq 10 permit 0.0.0.0/0 le 32
 !
+ip prefix-list 70.70.70.0 seq 5 permit 70.70.70.0/24
+!
 ip prefix-list no124specific seq 5 deny 172.16.124.1/32
 ip prefix-list no124specific seq 10 deny 172.16.124.2/32
 ip prefix-list no124specific seq 15 deny 172.16.124.4/32
 ip prefix-list no124specific seq 20 permit 0.0.0.0/0 le 32
+!
+ip prefix-list nobgp seq 5 deny 10.10.10.0/24
+ip prefix-list nobgp seq 10 deny 70.70.70.0/24
+ip prefix-list nobgp seq 15 permit 0.0.0.0/0 le 32
+!
+route-map 70.70.70.0 permit 10
+ match ip address prefix-list 70.70.70.0
 !
 route-map E2R permit 5
  match ip address prefix-list 124
@@ -1492,6 +1575,9 @@ route-map E2O permit 10
 !
 route-map O2E permit 10
  match metric 500 +- 500
+!
+route-map setpref permit 10
+ set local-preference 150
 !
 !
 !
@@ -1547,7 +1633,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 12:53:49 UTC Sun Apr 3 2016
+! Last configuration change at 01:20:36 UTC Wed Apr 6 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1630,7 +1716,7 @@ interface Loopback104
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.1.220 255.255.0.0
+ ip address 10.255.0.48 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -1639,6 +1725,7 @@ interface GigabitEthernet0/1
  description to iosvl2-2
  ip address 172.16.34.4 255.255.252.0
  ip summary-address rip 172.16.124.0 255.255.255.0
+ ip summary-address rip 10.10.10.0 255.255.255.0
  duplex full
  speed auto
  media-type rj45
@@ -1667,11 +1754,23 @@ router ospf 1
 router rip
  version 2
  redistribute ospf 1 metric 5 route-map O2E
+ redistribute bgp 300 metric 1 route-map 10.10.10.0
  passive-interface default
  no passive-interface GigabitEthernet0/1
  network 172.16.0.0
  distance 109 172.16.34.0 0.0.0.255 loops
  no auto-summary
+!
+router bgp 300
+ synchronization
+ bgp log-neighbor-changes
+ network 70.70.70.0 mask 255.255.255.0 backdoor
+ neighbor 172.16.34.10 remote-as 1000
+ neighbor 172.16.103.1 remote-as 300
+ neighbor 172.16.103.1 update-source Loopback104
+ neighbor 172.16.103.1 next-hop-self
+ neighbor 172.16.103.1 route-map setpref in
+ neighbor 172.16.124.2 remote-as 100
 !
 ip forward-protocol nd
 !
@@ -1681,6 +1780,8 @@ no ip http secure-server
 ip ssh server algorithm authentication password
 !
 ip access-list standard RIP
+ deny   10.10.10.0 0.0.0.255
+ deny   70.70.70.0 0.0.0.255
  permit 172.16.103.0 0.0.0.255
  permit 172.16.104.0 0.0.0.255
  permit 172.16.120.0 0.0.0.255
@@ -1689,12 +1790,24 @@ ip access-list standard loops
  permit 172.16.120.0 0.0.0.255
 !
 !
+ip prefix-list 10.10.10.0 seq 5 permit 10.10.10.0/24
+!
+ip prefix-list eigrpfromrip seq 5 deny 172.16.106.0/24
+ip prefix-list eigrpfromrip seq 10 deny 172.16.107.0/24
+ip prefix-list eigrpfromrip seq 15 permit 0.0.0.0/0 le 32
+!
+route-map 10.10.10.0 permit 10
+ match ip address prefix-list 10.10.10.0
+!
 route-map R2O permit 10
  match ip address name RIP
  set metric 30
 !
 route-map O2E permit 10
  match metric 500 +- 500
+!
+route-map setpref permit 10
+ set local-preference 150
 !
 !
 !
@@ -1749,7 +1862,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:47:14 UTC Sun Apr 3 2016
+! Last configuration change at 23:28:51 UTC Tue Apr 5 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1832,7 +1945,7 @@ interface Loopback105
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.1.221 255.255.0.0
+ ip address 10.255.0.49 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -1927,7 +2040,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:47:19 UTC Sun Apr 3 2016
+! Last configuration change at 11:19:24 UTC Wed Apr 6 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1967,6 +2080,14 @@ mmi snmp-timeout 180
 !
 !
 !
+ip dhcp excluded-address 172.16.36.0 172.16.37.255
+!
+ip dhcp pool DHCP
+ network 172.16.36.0 255.255.252.0
+ domain-name test.com
+ dns-server 172.16.17.2 
+ netbios-node-type h-node
+ default-router 172.16.36.1 
 !
 !
 !
@@ -1991,6 +2112,8 @@ redundancy
 !
 no cdp run
 !
+track 10 interface GigabitEthernet0/1.60 ip routing
+!
 ! 
 !
 !
@@ -2014,7 +2137,7 @@ interface Loopback106
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.1.222 255.255.0.0
+ ip address 10.255.0.46 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -2030,6 +2153,10 @@ interface GigabitEthernet0/1.10
  encapsulation dot1Q 10
  ip address 172.16.36.6 255.255.252.0
  ip authentication key-chain eigrp 1 eigrp
+ glbp 1 ip 172.16.36.1
+ glbp 1 weighting 110 lower 90
+ glbp 1 load-balancing host-dependent
+ glbp 1 weighting track 10 decrement 30
  no cdp enable
 !
 interface GigabitEthernet0/1.60
@@ -2043,6 +2170,13 @@ router eigrp 1
  network 172.16.16.0 0.0.0.255
  network 172.16.36.0 0.0.0.255
  network 172.16.106.1 0.0.0.0
+!
+router bgp 100
+ bgp log-neighbor-changes
+ neighbor 172.16.36.3 remote-as 300
+ neighbor 172.16.101.1 remote-as 100
+ neighbor 172.16.101.1 update-source Loopback106
+ neighbor 172.16.101.1 next-hop-self
 !
 ip forward-protocol nd
 !
@@ -2103,7 +2237,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:47:19 UTC Sun Apr 3 2016
+! Last configuration change at 23:28:37 UTC Tue Apr 5 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -2193,7 +2327,7 @@ interface Loopback107
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.1.223 255.255.0.0
+ ip address 10.255.0.47 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -2211,6 +2345,11 @@ router eigrp 1
  network 172.16.17.0 0.0.0.255
  network 172.16.107.1 0.0.0.0
 !
+router bgp 700
+ bgp log-neighbor-changes
+ redistribute connected route-map loop70
+ neighbor 172.16.17.1 remote-as 100
+!
 ip forward-protocol nd
 !
 !
@@ -2218,6 +2357,11 @@ no ip http server
 no ip http secure-server
 ip ssh server algorithm authentication password
 !
+!
+ip prefix-list loop70 seq 5 permit 70.70.70.0/24
+!
+route-map loop70 permit 10
+ match ip address prefix-list loop70
 !
 !
 !
@@ -2270,7 +2414,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:47:27 UTC Sun Apr 3 2016
+! Last configuration change at 23:28:58 UTC Tue Apr 5 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -2353,7 +2497,7 @@ interface Loopback108
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.1.224 255.255.0.0
+ ip address 10.255.0.53 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -2438,7 +2582,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:47:30 UTC Sun Apr 3 2016
+! Last configuration change at 01:57:26 UTC Wed Apr 6 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -2524,7 +2668,7 @@ interface Loopback120
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.1.225 255.255.0.0
+ ip address 10.255.0.54 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -2550,13 +2694,25 @@ router rip
  network 172.16.0.0
  no auto-summary
 !
+router bgp 1000
+ bgp log-neighbor-changes
+ network 10.10.10.0 mask 255.255.255.0
+ neighbor 172.16.34.3 remote-as 300
+ neighbor 172.16.34.4 remote-as 300
+ neighbor 172.16.34.4 route-map setpref in
+!
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
+ip http client username SALLY
+ip http client password 0 cisco
 ip ssh server algorithm authentication password
 !
+!
+route-map setpref permit 10
+ set local-preference 150
 !
 !
 !
