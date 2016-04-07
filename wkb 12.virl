@@ -8,7 +8,7 @@
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 10:59:59 UTC Wed Apr 6 2016
+! Last configuration change at 23:37:16 UTC Wed Apr 6 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -100,7 +100,7 @@ interface GigabitEthernet0/0
  description OOB management
  no switchport
  vrf forwarding Mgmt-intf
- ip address 10.255.0.43 255.255.0.0
+ ip address 10.255.0.80 255.255.0.0
  negotiation auto
 !
 interface GigabitEthernet1/0
@@ -233,7 +233,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 10:56:28 UTC Wed Apr 6 2016
+! Last configuration change at 23:37:38 UTC Wed Apr 6 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -325,7 +325,7 @@ interface GigabitEthernet0/0
  description OOB management
  no switchport
  vrf forwarding Mgmt-intf
- ip address 10.255.0.41 255.255.0.0
+ ip address 10.255.0.83 255.255.0.0
  negotiation auto
 !
 interface GigabitEthernet1/0
@@ -454,7 +454,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:06:51 UTC Wed Apr 6 2016
+! Last configuration change at 23:37:25 UTC Wed Apr 6 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -546,7 +546,7 @@ interface GigabitEthernet0/0
  description OOB management
  no switchport
  vrf forwarding Mgmt-intf
- ip address 10.255.0.42 255.255.0.0
+ ip address 10.255.0.82 255.255.0.0
  negotiation auto
 !
 interface GigabitEthernet1/0
@@ -675,7 +675,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:18:52 UTC Wed Apr 6 2016
+! Last configuration change at 23:37:06 UTC Wed Apr 6 2016
 !
 version 15.2
 service timestamps debug datetime msec
@@ -765,7 +765,7 @@ interface GigabitEthernet0/0
  description OOB management
  no switchport
  vrf forwarding Mgmt-intf
- ip address 10.255.0.45 255.255.0.0
+ ip address 10.255.0.79 255.255.0.0
  negotiation auto
 !
 interface GigabitEthernet1/0
@@ -894,7 +894,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 10:24:39 UTC Wed Apr 6 2016
+! Last configuration change at 00:54:13 UTC Thu Apr 7 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -939,6 +939,7 @@ mmi snmp-timeout 180
 !
 no ip domain lookup
 ip domain name virl.info
+ip multicast-routing 
 ip cef
 ipv6 unicast-routing
 ipv6 cef
@@ -979,11 +980,13 @@ interface Loopback0
 !
 interface Loopback101
  ip address 172.16.101.1 255.255.255.0
+ ip pim sparse-dense-mode
+ ip igmp join-group 233.3.3.3
 !
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.0.52 255.255.0.0
+ ip address 10.255.0.86 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -1013,6 +1016,7 @@ interface GigabitEthernet0/1.60
 interface GigabitEthernet0/2
  description to unmanagedswitch-1
  ip address 172.16.124.1 255.255.255.0
+ ip pim sparse-dense-mode
  ip ospf network point-to-multipoint
  duplex full
  speed auto
@@ -1022,6 +1026,7 @@ interface GigabitEthernet0/3
  description to iosv-3
  ip address 172.16.13.1 255.255.255.0
  ip access-group 120 in
+ ip pim sparse-dense-mode
  ip ospf network broadcast
  ip ospf priority 255
  duplex full
@@ -1061,6 +1066,9 @@ ip http port 8080
 ip http authentication local
 no ip http secure-server
 ip http path flash0:
+ip pim rp-address 172.16.103.1
+ip mroute 172.16.103.1 255.255.255.255 172.16.13.3
+ip mroute 172.16.34.0 255.255.255.0 172.16.13.3
 ip ssh server algorithm authentication password
 !
 !
@@ -1144,7 +1152,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 23:28:45 UTC Tue Apr 5 2016
+! Last configuration change at 00:39:29 UTC Thu Apr 7 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1189,6 +1197,7 @@ mmi snmp-timeout 180
 !
 no ip domain lookup
 ip domain name virl.info
+ip multicast-routing 
 ip cef
 ipv6 unicast-routing
 ipv6 cef
@@ -1227,7 +1236,7 @@ interface Loopback102
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.0.50 255.255.0.0
+ ip address 10.255.0.88 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -1243,6 +1252,7 @@ interface GigabitEthernet0/1
 interface GigabitEthernet0/2
  description to unmanagedswitch-1
  ip address 172.16.124.2 255.255.255.0
+ ip pim sparse-dense-mode
  ip ospf network point-to-multipoint
  duplex full
  speed auto
@@ -1251,6 +1261,8 @@ interface GigabitEthernet0/2
 interface GigabitEthernet0/3
  description to iosv-5
  ip address 172.16.25.2 255.255.255.224
+ ip pim sparse-dense-mode
+ ip igmp join-group 233.3.3.3
  duplex full
  speed auto
  media-type rj45
@@ -1281,6 +1293,7 @@ ip forward-protocol nd
 !
 no ip http server
 no ip http secure-server
+ip pim rp-address 172.16.103.1
 ip ssh server algorithm authentication password
 !
 !
@@ -1341,7 +1354,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:18:41 UTC Wed Apr 6 2016
+! Last configuration change at 00:56:33 UTC Thu Apr 7 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1397,6 +1410,7 @@ ip dhcp pool DHCP
 !
 no ip domain lookup
 ip domain name virl.info
+ip multicast-routing 
 ip cef
 ipv6 unicast-routing
 ipv6 cef
@@ -1437,11 +1451,13 @@ interface Loopback0
 !
 interface Loopback103
  ip address 172.16.103.1 255.255.255.0
+ ip pim sparse-dense-mode
+ ip igmp join-group 233.3.3.3
 !
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.0.51 255.255.0.0
+ ip address 10.255.0.87 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -1462,6 +1478,7 @@ interface GigabitEthernet0/1
 interface GigabitEthernet0/2
  description to iosvl2-1
  ip address 172.16.34.3 255.255.252.0
+ ip pim sparse-dense-mode
  duplex full
  speed auto
  media-type rj45
@@ -1469,6 +1486,7 @@ interface GigabitEthernet0/2
 interface GigabitEthernet0/3
  description to iosv-1
  ip address 172.16.13.3 255.255.255.0
+ ip pim sparse-dense-mode
  ip ospf network broadcast
  ip ospf priority 0
  duplex full
@@ -1526,6 +1544,7 @@ ip forward-protocol nd
 !
 no ip http server
 no ip http secure-server
+ip pim rp-address 172.16.103.1
 ip ssh server algorithm authentication password
 !
 ip access-list standard RIP
@@ -1633,7 +1652,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 01:20:36 UTC Wed Apr 6 2016
+! Last configuration change at 00:54:57 UTC Thu Apr 7 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1678,6 +1697,7 @@ mmi snmp-timeout 180
 !
 no ip domain lookup
 ip domain name virl.info
+ip multicast-routing 
 ip cef
 ipv6 unicast-routing
 ipv6 cef
@@ -1712,11 +1732,13 @@ interface Loopback0
 !
 interface Loopback104
  ip address 172.16.104.1 255.255.255.0
+ ip pim sparse-dense-mode
+ ip igmp join-group 233.3.3.3
 !
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.0.48 255.255.0.0
+ ip address 10.255.0.90 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -1733,6 +1755,7 @@ interface GigabitEthernet0/1
 interface GigabitEthernet0/2
  description to unmanagedswitch-1
  ip address 172.16.124.4 255.255.255.0
+ ip pim sparse-dense-mode
  ip ospf network point-to-multipoint
  duplex full
  speed auto
@@ -1777,6 +1800,9 @@ ip forward-protocol nd
 !
 no ip http server
 no ip http secure-server
+ip pim rp-address 172.16.103.1
+ip mroute 172.16.103.1 255.255.255.255 172.16.124.1
+ip mroute 172.16.34.0 255.255.255.0 172.16.124.1
 ip ssh server algorithm authentication password
 !
 ip access-list standard RIP
@@ -1862,7 +1888,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 23:28:51 UTC Tue Apr 5 2016
+! Last configuration change at 00:39:56 UTC Thu Apr 7 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -1907,6 +1933,7 @@ mmi snmp-timeout 180
 !
 no ip domain lookup
 ip domain name virl.info
+ip multicast-routing 
 ip cef
 ipv6 unicast-routing
 ipv6 cef
@@ -1945,7 +1972,7 @@ interface Loopback105
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.0.49 255.255.0.0
+ ip address 10.255.0.89 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -1966,6 +1993,8 @@ interface GigabitEthernet0/2
 interface GigabitEthernet0/3
  description to iosv-2
  ip address 172.16.25.5 255.255.255.224
+ ip pim sparse-dense-mode
+ ip igmp join-group 233.3.3.3
  duplex full
  speed auto
  media-type rj45
@@ -1981,6 +2010,7 @@ ip forward-protocol nd
 !
 no ip http server
 no ip http secure-server
+ip pim rp-address 172.16.103.1
 ip ssh server algorithm authentication password
 !
 !
@@ -2040,7 +2070,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 11:19:24 UTC Wed Apr 6 2016
+! Last configuration change at 00:07:33 UTC Thu Apr 7 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -2137,7 +2167,7 @@ interface Loopback106
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.0.46 255.255.0.0
+ ip address 10.255.0.92 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -2237,7 +2267,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 23:28:37 UTC Tue Apr 5 2016
+! Last configuration change at 00:07:27 UTC Thu Apr 7 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -2327,7 +2357,7 @@ interface Loopback107
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.0.47 255.255.0.0
+ ip address 10.255.0.91 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -2414,7 +2444,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 23:28:58 UTC Tue Apr 5 2016
+! Last configuration change at 00:06:47 UTC Thu Apr 7 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -2497,7 +2527,7 @@ interface Loopback108
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.0.53 255.255.0.0
+ ip address 10.255.0.85 255.255.0.0
  duplex full
  speed auto
  media-type rj45
@@ -2582,7 +2612,7 @@ end</entry>
         <extensions>
             <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
             <entry key="config" type="String">!
-! Last configuration change at 01:57:26 UTC Wed Apr 6 2016
+! Last configuration change at 00:06:30 UTC Thu Apr 7 2016
 !
 version 15.6
 service timestamps debug datetime msec
@@ -2668,7 +2698,7 @@ interface Loopback120
 interface GigabitEthernet0/0
  description OOB Management
  vrf forwarding Mgmt-intf
- ip address 10.255.0.54 255.255.0.0
+ ip address 10.255.0.84 255.255.0.0
  duplex full
  speed auto
  media-type rj45
